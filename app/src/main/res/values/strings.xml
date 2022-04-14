@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Assignment</string>
+    <string name="bottom_menu_trending_text">Trending GIF</string>
+    <string name="bottom_navi_favorite_text">Favorite</string>
+</resources>
