@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
+import androidx.room.Room
+import com.example.assignment.database.AppDatabase
 import com.example.assignment.dto.GIFDto
 import com.example.assignment.favorite.FavoriteFragment
 import com.example.assignment.service.GIFService

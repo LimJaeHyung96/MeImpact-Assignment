@@ -1,25 +1,30 @@
 package com.example.assignment.trending
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.room.Room
+import com.example.assignment.MainActivity
 import com.example.assignment.R
+import com.example.assignment.database.AppDatabase
 import com.example.assignment.databinding.FragmentTrendingGifBinding
 import com.example.assignment.dto.GIFDto
 import com.example.assignment.key.APIKey.Companion.GIPHY_API_KEY
 import com.example.assignment.service.GIFService
+import com.example.assignment.state.State
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class TrendingFragment : Fragment(R.layout.fragment_trending_gif) {
-
+class TrendingFragment() : Fragment(R.layout.fragment_trending_gif) {
     private var binding: FragmentTrendingGifBinding? = null
-    private val trendingAdapter = TrendingAdapter()
+    lateinit var trendingAdapter: TrendingAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -27,7 +32,14 @@ class TrendingFragment : Fragment(R.layout.fragment_trending_gif) {
         val fragmentTrendingGifBinding = FragmentTrendingGifBinding.bind(view)
         binding = fragmentTrendingGifBinding
 
-        fragmentTrendingGifBinding.trendingRecyclerView.layoutManager = LinearLayoutManager(context)
+        Log.d("Context",context.toString())
+
+        val db = context?.let { Room.databaseBuilder(it, AppDatabase::class.java, "favoriteGIFDB").build() }
+
+        trendingAdapter = TrendingAdapter(db!!)
+
+        fragmentTrendingGifBinding.trendingRecyclerView.layoutManager =
+            GridLayoutManager(context, 3)
         fragmentTrendingGifBinding.trendingRecyclerView.adapter = trendingAdapter
 
         getTrendingGIF()
@@ -43,8 +55,8 @@ class TrendingFragment : Fragment(R.layout.fragment_trending_gif) {
             it.getTrendingGIFList(GIPHY_API_KEY)
                 .enqueue(object : Callback<GIFDto> {
                     override fun onResponse(call: Call<GIFDto>, response: Response<GIFDto>) {
-                        if(response.isSuccessful.not()){
-                            Log.d("MainActivity","사진을 받아오지 못함")
+                        if (response.isSuccessful.not()) {
+                            Log.d("MainActivity", "사진을 받아오지 못함")
                             return
                         }
 
