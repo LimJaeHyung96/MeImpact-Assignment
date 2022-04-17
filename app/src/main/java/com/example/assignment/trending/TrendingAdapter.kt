@@ -1,9 +1,12 @@
 package com.example.assignment.trending
 
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -14,6 +17,8 @@ import com.example.assignment.model.FavoriteGIFModel
 import com.example.assignment.model.GIFModel
 
 class TrendingAdapter(val db: AppDatabase) : ListAdapter<GIFModel, TrendingAdapter.ViewHolder>(diffUtil) {
+
+    val handler = Handler(Looper.getMainLooper())
 
     inner class ViewHolder(private val binding: ItemTrendingBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -27,21 +32,52 @@ class TrendingAdapter(val db: AppDatabase) : ListAdapter<GIFModel, TrendingAdapt
                 Log.d("Trending", "사진을 가져오지 못했습니다")
             }
 
+            favoriteButtonToggle(gifModel.id)
+
+            binding.touchGIF.setOnClickListener {
+                makeFavoriteGIFModel(gifModel)
+            }
+        }
+
+        private fun favoriteButtonToggle(gifId: String) {
+            Thread(Runnable {
+                if(db.favoriteGIFModelDao().getId(gifId) == gifId){
+                    handler.post(Runnable {
+                        binding.likeButton.isVisible = true
+                        binding.dislikeButton.isVisible = false
+                    })
+                } else {
+                    handler.post(Runnable {
+                        binding.likeButton.isVisible = false
+                        binding.dislikeButton.isVisible = true
+                    })
+                }
+            }).start()
+        }
+
+        private fun makeFavoriteGIFModel(gifModel: GIFModel) {
             val list = FavoriteGIFModel(
                 id = gifModel.id,
                 url = gifModel.images.original.url,
-                like = "like",
-                uid = System.currentTimeMillis().toInt()
+                uid = System.currentTimeMillis().toInt(),
+                like = "like"
             )
 
-            binding.favoriteButton.setOnClickListener {
+            Thread(Runnable {
                 if(db.favoriteGIFModelDao().getId(gifModel.id) != gifModel.id){
-                    //Cannot access database on the main thread since it may potentially lock the UI for a long period of time.
-                    // todo 쓰레드 만들어서 쓰레드에서 데이터베이스에 저장
                     db.favoriteGIFModelDao().insertGIF(list)
-                    Toast.makeText(itemView.context, "추가!", Toast.LENGTH_SHORT).show()
+                    handler.post(Runnable {
+                        Toast.makeText(itemView.context, "이 사진을 favorite에 추가했습니다!!", Toast.LENGTH_SHORT).show()
+                        notifyItemChanged(adapterPosition)
+                    })
+                } else {
+                    db.favoriteGIFModelDao().deleteItem(gifModel.id)
+                    handler.post(Runnable {
+                        Toast.makeText(itemView.context, "이 사진을 favorite에서 삭제했습니다!!", Toast.LENGTH_SHORT).show()
+                        notifyItemChanged(adapterPosition)
+                    })
                 }
-            }
+            }).start()
         }
     }
 

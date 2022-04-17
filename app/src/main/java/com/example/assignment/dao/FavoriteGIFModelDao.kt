@@ -16,10 +16,13 @@ interface FavoriteGIFModelDao {
     @Query("DELETE FROM favoriteGIFModel")
     fun deleteAll()
 
+    @Query("DELETE FROM favoriteGIFModel WHERE id = :id")
+    fun deleteItem(id: String)
+
     @Query("SELECT id FROM favoriteGIFModel WHERE id = :id")
     fun getId(id: String): String?
 
-    @Query("SELECT 'like' FROM favoriteGIFModel WHERE id = :id")
+    @Query("SELECT `like` FROM favoriteGIFModel WHERE id = :id")
     fun getLike(id: String): String?
 
     @Query("SELECT url FROM favoriteGIFModel WHERE id = :id")

@@ -10,18 +10,23 @@ import com.bumptech.glide.Glide
 import com.example.assignment.databinding.ItemFavoriteBinding
 import com.example.assignment.model.FavoriteGIFModel
 
-class FavoriteAdapter() : ListAdapter<FavoriteGIFModel, FavoriteAdapter.ViewHolder>(diffUtil) {
+class FavoriteAdapter(val itemClicked: (FavoriteGIFModel) -> Unit) : ListAdapter<FavoriteGIFModel, FavoriteAdapter.ViewHolder>(diffUtil) {
 
     inner class ViewHolder(private val binding: ItemFavoriteBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(favoriteGIFModel: FavoriteGIFModel) {
+            Log.d("Favorite","${favoriteGIFModel.url} & ${favoriteGIFModel.id}")
             if (favoriteGIFModel.url.isNotEmpty()) {
                 Glide.with(binding.gifImageView)
                     .load(favoriteGIFModel.url)
                     .into(binding.gifImageView)
-                Log.d("Trending","사진은 잘 가져옴")
+                Log.d("Favorite","사진은 잘 가져옴")
             } else {
-                Log.d("Trending", "사진을 가져오지 못했습니다")
+                Log.d("Favorite", "사진을 가져오지 못했습니다")
+            }
+
+            binding.root.setOnClickListener {
+                itemClicked(favoriteGIFModel)
             }
         }
     }

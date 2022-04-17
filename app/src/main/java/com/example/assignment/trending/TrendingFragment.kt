@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.room.Room
@@ -34,12 +35,14 @@ class TrendingFragment() : Fragment(R.layout.fragment_trending_gif) {
 
         Log.d("Context",context.toString())
 
-        val db = context?.let { Room.databaseBuilder(it, AppDatabase::class.java, "favoriteGIFDB").build() }
+        val db = Room.databaseBuilder(requireContext(), AppDatabase::class.java, "favoriteGIFDB").build()
 
-        trendingAdapter = TrendingAdapter(db!!)
+        trendingAdapter = TrendingAdapter(db)
+
+        fragmentTrendingGifBinding.progressBar.isVisible = true
 
         fragmentTrendingGifBinding.trendingRecyclerView.layoutManager =
-            GridLayoutManager(context, 3)
+            GridLayoutManager(context, 2)
         fragmentTrendingGifBinding.trendingRecyclerView.adapter = trendingAdapter
 
         getTrendingGIF()
@@ -62,6 +65,9 @@ class TrendingFragment() : Fragment(R.layout.fragment_trending_gif) {
 
                         response.body()?.let { gifDto ->
                             trendingAdapter.submitList(gifDto.data)
+                            binding?.let {  fragmentBinding ->
+                                fragmentBinding.progressBar.isVisible = false
+                            }
                             Log.d("MainActivity", gifDto.toString())
                         }
                     }
